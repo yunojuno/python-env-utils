@@ -41,7 +41,7 @@ Installation
 The library is available at pypi as 'python_env_utils', and can therefore be
 installed using pip::
 
-    $ pip install python_env_utils
+    $ pip install env_utils
 
 Tests
 -----
