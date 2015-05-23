@@ -21,7 +21,7 @@ is almost never the desired behaviour. If you set an environment variable to
     >>> val = os.getenv('foo')
     >>> val
     "0"
-    >>> boo(val)
+    >>> bool(val)
     True
 
 ``env_utils.getenv`` will coerce the value into the type you require:
@@ -38,8 +38,7 @@ is almost never the desired behaviour. If you set an environment variable to
 Installation
 ------------
 
-The library is available at pypi as 'python_env_utils', and can therefore be
-installed using pip::
+The library is available at pypi as 'env_utils', and can installed using pip::
 
     $ pip install env_utils
 
