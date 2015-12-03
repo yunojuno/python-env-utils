@@ -13,7 +13,7 @@ setup(
     packages=['env_utils'],
     include_package_data=True,
     install_requires=[],
-    license=open(join(dirname(__file__), 'LICENCE.md')).read(),
+    license="MIT",
     description="Utility functions to make it easier to work with os.environ",
     long_description=open(join(dirname(__file__), 'README.rst')).read(),
     url='https://github.com/yunojuno/python-env-utils',
@@ -21,7 +21,7 @@ setup(
     author_email='hugo@yunojuno.com',
     classifiers=[
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: BSD License',
+        'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.7',
