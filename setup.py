@@ -9,7 +9,7 @@ os.chdir(normpath(join(abspath(__file__), os.pardir)))
 
 setup(
     name="env_utils",
-    version="1.1.0-dev",
+    version="1.1.0",
     packages=find_packages(),
     include_package_data=True,
     install_requires=['python-dateutil>=2.6'],
