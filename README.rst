@@ -2,7 +2,7 @@ env_utils
 =========
 
 This library extends the standard library's ``getenv`` function, allowing
-you to coerce the return value into a boolean or integer.
+you to coerce the return value into a type.
 
 And that's it.
 
@@ -24,16 +24,26 @@ is almost never the desired behaviour. If you set an environment variable to
     >>> bool(val)
     True
 
-``env_utils.getenv`` will coerce the value into the type you require:
+``env_utils.get_env`` will coerce the value into the type you require. It can
+coerce booleans, integers, decimals, floats, dates, lists and dictionaries.
 
 .. code:: python
 
-    >>> env_utils.getenv('foo')
+    >>> env_utils.get_env('foo')
     "0"
-    >>> env_utils.getenv('foo', coerce=bool_)
+    >>> env_utils.get_bool('foo')
     False
-    >>> env_utils.getenv('foo', coerce=int_)
-    0
+    >>> env_utils.get_int('01')
+    1
+    >>> env_utils.get_list('foo bar')
+    ['foo', 'bar']
+    >>> env_utils.get_dict('{"foo": true}")
+    {'foo': True}
+    >>> env_utils.get_date('2016-11-23')
+    datetime.date(2016, 11, 23)
+    >>> env_utils.get_float('1')
+    1.0
+
 
 Installation
 ------------
