@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-"""env_utils tests."""
 import datetime
 from decimal import Decimal, InvalidOperation
 import inspect
@@ -17,6 +16,7 @@ from env_utils import (
     get_dict,
     get_date,
     get_datetime,
+    _get_env,
     RequiredSettingMissing,
     coerce_bool,
     coerce_int,
@@ -106,6 +106,19 @@ class TestFunctions(unittest.TestCase):
         # required=True and a default value don't mix
         self.assertRaises(AssertionError, get_env, "foo", default='foo', required=True)
 
+    def test__get_env(self):
+        # too many args - we only support one default value ('bar')
+        self.assertRaises(AssertionError, _get_env, 'foo', 'bar', 'baz')
+        # missing 'coerce' kwarg
+        self.assertRaises(AssertionError, _get_env, 'foo', 'bar')
+        # missing env var, use default
+        del self.environ['FOO']
+        self.assertRaises(RequiredSettingMissing, _get_env, 'FOO', coerce=lambda x: x)
+        self.assertEqual(_get_env('FOO', 'bar', coerce=lambda x: x), 'bar')
+        # valid env var
+        self.environ['FOO'] = 'baz'
+        self.assertEqual(_get_env('FOO', coerce=lambda x: x), 'baz')
+
     def test_get_int(self):
         self.assertFunc(get_int, "1", 1)
         self.assertFunc(get_int, "bar", Exception)
@@ -119,7 +132,7 @@ class TestFunctions(unittest.TestCase):
         self.assertFunc(get_decimal, "bar", Exception)
 
     def test_get_bool(self):
-        self.assertFunc(get_bool, "false", False)
+        self.assertFunc(get_bool, "bar", False)
         self.assertFunc(get_bool, "1", True)
 
     def test_get_list(self):

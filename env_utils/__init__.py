@@ -57,42 +57,69 @@ coerce_datetime = lambda x: parser.parse(x)
 coerce_date = lambda x: parser.parse(x).date()
 
 
-def get_bool(key, default=None, required=False):
+def _get_env(key, *default, **kwargs):
+    """
+    Unpack default, required and coerce kwargs.
+
+    This is a helper function used to unpack the type-specific get_FOO
+    functions' args. Each individual function has one mandatory arg (key),
+    and an optional arg (*default) - this is a hack. If a default is not
+    passed in, then the env var is assumed to be required.
+
+    This function should never be called directly.
+
+        # 'foo' is a mandatory env var
+        >>> get_int('foo')
+
+        # 'foo' is optional
+        >>> get_int('foo', 123)
+
+    """
+    assert len(default) in (0, 1), "Too many args supplied."
+    assert 'coerce' in kwargs, "Kwargs must include 'coerce' function arg."
+    if len(default) == 0:
+        return get_env(key, coerce=kwargs['coerce'], required=True)
+    else:
+        return get_env(key, default=default[0], coerce=kwargs['coerce'])
+
+
+def get_bool(key, *default):
     """Return env var cast as boolean."""
-    return get_env(key, default=default, coerce=coerce_bool, required=required)
+    return _get_env(key, *default, coerce=coerce_bool)
 
 
-def get_int(key, default=None, required=False):
+def get_int(key, *default):
     """Return env var cast as integer."""
-    return get_env(key, default=default, coerce=coerce_int, required=required)
+    return _get_env(key, *default, coerce=coerce_int)
 
 
-def get_float(key, default=None, required=False):
+def get_float(key, *default):
     """Return env var cast as float."""
-    return get_env(key, default=default, coerce=coerce_float, required=required)
+    return _get_env(key, *default, coerce=coerce_float)
 
 
-def get_decimal(key, default=None, required=False):
+def get_decimal(key, *default):
     """Return env var cast as Decimal."""
-    return get_env(key, default=default, coerce=coerce_decimal, required=required)
+    return _get_env(key, *default, coerce=coerce_decimal)
 
 
-def get_list(key, separator=' ', default=None, required=None):
+def get_list(key, separator=' ', *default):
     """Return env var as a list."""
     func = lambda x: x.split(separator)
-    return get_env(key, default=default, coerce=func, required=required)
+    return _get_env(key, *default, coerce=func)
+    # return get_env(key, default=default, coerce=func, required=required)
 
 
-def get_dict(key, default=None, required=None):
+def get_dict(key, *default):
     """Return env var as a dict."""
-    return get_env(key, default=default, coerce=coerce_dict, required=required)
+    return _get_env(key, *default, coerce=coerce_dict)
 
 
-def get_datetime(key, default=None, required=None):
-    """Return env var as a datetime."""
-    return get_env(key, default=default, coerce=coerce_datetime, required=required)
-
-
-def get_date(key, default=None, required=None):
+def get_date(key, *default):
     """Return env var as a date."""
-    return get_env(key, default=default, coerce=coerce_date, required=required)
+    return _get_env(key, *default, coerce=coerce_date)
+
+
+def get_datetime(key, *default):
+    """Return env var as a datetime."""
+    return _get_env(key, *default, coerce=coerce_datetime)
