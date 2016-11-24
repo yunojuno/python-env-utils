@@ -82,42 +82,31 @@ class TestFunctions(unittest.TestCase):
         # add timezone info
         self.assertRaises(ValueError, coerce_date, "hello, world!")
 
-    def test_get_env(self):
-        """Test env_utils.getenv function.
-
-        Scenarios tested:
-
-        1. env var is missing, and required
-        2. env var is missing, and optional, without default
-        3. env var is missing, and optional, with default
-        4. env var is good
-        5. env var is bad
-        6. invalid kwargs
-
-        """
-        # env var is missing
-        self.assertRaises(RequiredSettingMissing, get_env, "bar", required=True)
-        self.assertEqual(get_env("bar", required=False), None)
-        self.assertEqual(get_env("bar", default='baz'), 'baz')
-        # env var exists
-        self.assertFunc(get_env, 'X', 'X')
-        # env var coercian fails
-        self.assertRaises(Exception, get_env, "foo", coerce=lambda x: int(x))
-        # required=True and a default value don't mix
-        self.assertRaises(AssertionError, get_env, "foo", default='foo', required=True)
-
     def test__get_env(self):
+        # env var is missing
+        func = lambda x: x
+        self.assertRaises(RequiredSettingMissing, _get_env, "bar", None, func, True)
+        self.assertEqual(_get_env("bar", 'baz'), 'baz')
+        # env var exists
+        self.environ['FOO'] = 'bar'
+        self.assertEqual(_get_env('FOO', None), 'bar')
+        # env var coercian fails
+        func = lambda x: int(x)
+        self.assertRaises(Exception, _get_env, "FOO", coerce=func)
+
+    def test_get_env(self):
         # too many args - we only support one default value ('bar')
-        self.assertRaises(AssertionError, _get_env, 'foo', 'bar', 'baz')
-        # missing 'coerce' kwarg
-        self.assertRaises(AssertionError, _get_env, 'foo', 'bar')
+        self.assertRaises(AssertionError, get_env, 'foo', 'bar', 'baz')
         # missing env var, use default
         del self.environ['FOO']
-        self.assertRaises(RequiredSettingMissing, _get_env, 'FOO', coerce=lambda x: x)
-        self.assertEqual(_get_env('FOO', 'bar', coerce=lambda x: x), 'bar')
+        self.assertRaises(RequiredSettingMissing, get_env, 'FOO', coerce=lambda x: x)
+        self.assertEqual(get_env('FOO', 'bar', coerce=lambda x: x), 'bar')
         # valid env var
-        self.environ['FOO'] = 'baz'
-        self.assertEqual(_get_env('FOO', coerce=lambda x: x), 'baz')
+        self.assertFunc(get_env, 'foo', 'foo')
+
+    def test_get_bool(self):
+        self.assertFunc(get_bool, "bar", False)
+        self.assertFunc(get_bool, "1", True)
 
     def test_get_int(self):
         self.assertFunc(get_int, "1", 1)
@@ -130,10 +119,6 @@ class TestFunctions(unittest.TestCase):
     def test_get_decimal(self):
         self.assertFunc(get_decimal, "1", Decimal("1"))
         self.assertFunc(get_decimal, "bar", Exception)
-
-    def test_get_bool(self):
-        self.assertFunc(get_bool, "bar", False)
-        self.assertFunc(get_bool, "1", True)
 
     def test_get_list(self):
         self.assertFunc(get_list, "false", ['false'])
