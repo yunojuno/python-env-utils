@@ -103,11 +103,11 @@ def get_decimal(key, *default):
     return _get_env(key, *default, coerce=coerce_decimal)
 
 
-def get_list(key, separator=' ', *default):
+def get_list(key, *default, **kwargs):
     """Return env var as a list."""
+    separator = kwargs.get('separator', ' ')
     func = lambda x: x.split(separator)
     return _get_env(key, *default, coerce=func)
-    # return get_env(key, default=default, coerce=func, required=required)
 
 
 def get_dict(key, *default):

@@ -140,6 +140,7 @@ class TestFunctions(unittest.TestCase):
         self.assertFunc(get_list, "true false", ['true', 'false'])
         self.environ['foo'] = "true,false"
         self.assertEqual(get_list('foo', separator=','), ['true', 'false'])
+        self.assertEqual(get_list('foo', ["baz"]), ['true,false'])
 
     def test_get_dict(self):
         self.assertFunc(get_dict, "false", False)

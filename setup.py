@@ -13,8 +13,8 @@ REQUIREMENTS = '\n'.join(open(os.path.join(os.path.dirname(__file__), 'requireme
 os.chdir(normpath(join(abspath(__file__), os.pardir)))
 
 setup(
-    name="env_utils",
-    version="1.2.0",
+    name="python-env-utils",
+    version="0.1.1",
     packages=find_packages(),
     include_package_data=True,
     install_requires=REQUIREMENTS,
@@ -26,7 +26,7 @@ setup(
     author_email='hugo@yunojuno.com',
     classifiers=[
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: BSD License',
+        'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.7',
