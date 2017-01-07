@@ -1,8 +1,8 @@
 .. image:: https://travis-ci.org/yunojuno/python-env-utils.svg?branch=master
     :target: https://travis-ci.org/yunojuno/python-env-utils
 
-.. image:: https://badge.fury.io/py/env_utils.svg
-    :target: https://badge.fury.io/py/env_utils
+.. image:: https://badge.fury.io/py/python-env-utils.svg
+    :target: https://badge.fury.io/py/python-env-utils
 
 .. image:: https://codecov.io/gh/yunojuno/python-env-utils/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/yunojuno/python-env-utils
@@ -77,9 +77,9 @@ You can supply any function you like to coerce the value, e.g.:
 Installation
 ------------
 
-The library is available at pypi as 'env_utils', and can installed using pip::
+The library is available at pypi as 'python-env-utils', and can installed using pip::
 
-    $ pip install env_utils
+    $ pip install python-env-utils
 
 Tests
 -----
