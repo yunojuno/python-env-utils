@@ -18,13 +18,14 @@ from env_utils import (
     get_datetime,
     _get_env,
     RequiredSettingMissing,
-    coerce_bool,
-    coerce_int,
-    coerce_float,
-    coerce_decimal,
-    coerce_dict,
-    coerce_datetime,
-    coerce_date,
+    CoercianError,
+    _bool,
+    _int,
+    _float,
+    _decimal,
+    _dict,
+    _datetime,
+    _date,
 )
 
 
@@ -42,45 +43,45 @@ class TestFunctions(unittest.TestCase):
     def setUp(self):
         self.environ = EnvironmentVarGuard()
 
-    def test_coerce_bool(self):
-        self.assertEqual(coerce_bool("true"), True)
-        self.assertEqual(coerce_bool("TRUE"), True)
-        self.assertEqual(coerce_bool("1"), True)
-        self.assertEqual(coerce_bool("y"), True)
-        self.assertEqual(coerce_bool("tru"), False)
-        self.assertEqual(coerce_bool("0"), False)
-        self.assertEqual(coerce_bool(None), False)
+    def test__bool(self):
+        self.assertEqual(_bool("true"), True)
+        self.assertEqual(_bool("TRUE"), True)
+        self.assertEqual(_bool("1"), True)
+        self.assertEqual(_bool("y"), True)
+        self.assertEqual(_bool("tru"), False)
+        self.assertEqual(_bool("0"), False)
+        self.assertEqual(_bool(None), False)
 
-    def test_coerce_int(self):
-        self.assertEqual(coerce_int("01"), 1)
-        self.assertRaises(ValueError, coerce_int, "foo")
+    def test__int(self):
+        self.assertEqual(_int("01"), 1)
+        self.assertRaises(ValueError, _int, "foo")
 
-    def test_coerce_float(self):
-        self.assertEqual(coerce_float("01"), 1.0)
-        self.assertRaises(ValueError, coerce_float, "foo")
+    def test__float(self):
+        self.assertEqual(_float("01"), 1.0)
+        self.assertRaises(ValueError, _float, "foo")
 
-    def test_coerce_decimal(self):
-        self.assertEqual(coerce_decimal("01"), Decimal('1.0'))
-        self.assertRaises(InvalidOperation, coerce_decimal, "foo")
+    def test__decimal(self):
+        self.assertEqual(_decimal("01"), Decimal('1.0'))
+        self.assertRaises(InvalidOperation, _decimal, "foo")
 
-    def test_coerce_dict(self):
-        self.assertEqual(coerce_dict("false"), False)
-        self.assertEqual(coerce_dict("{\"foo\": false}"), {'foo': False})
-        self.assertRaises(ValueError, coerce_dict, "hello, world!")
+    def test__dict(self):
+        self.assertEqual(_dict("false"), False)
+        self.assertEqual(_dict("{\"foo\": false}"), {'foo': False})
+        self.assertRaises(ValueError, _dict, "hello, world!")
 
-    def test_coerce_datetime(self):
+    def test__datetime(self):
         now = datetime.datetime.now()
-        self.assertEqual(coerce_datetime(now.isoformat()), now)
+        self.assertEqual(_datetime(now.isoformat()), now)
         # add timezone info
         now = datetime.datetime.now(pytz.utc)
-        self.assertEqual(coerce_datetime(now.isoformat()), now)
-        self.assertRaises(ValueError, coerce_datetime, "hello, world!")
+        self.assertEqual(_datetime(now.isoformat()), now)
+        self.assertRaises(ValueError, _datetime, "hello, world!")
 
-    def test_coerce_date(self):
+    def test__date(self):
         today = datetime.date.today()
-        self.assertEqual(coerce_date(today.isoformat()), today)
+        self.assertEqual(_date(today.isoformat()), today)
         # add timezone info
-        self.assertRaises(ValueError, coerce_date, "hello, world!")
+        self.assertRaises(ValueError, _date, "hello, world!")
 
     def test__get_env(self):
         # env var is missing
@@ -93,6 +94,14 @@ class TestFunctions(unittest.TestCase):
         # env var coercian fails
         func = lambda x: int(x)
         self.assertRaises(Exception, _get_env, "FOO", coerce=func)
+
+    def test__get_env_defaults(self):
+        # test default values work, and are coerced
+        del self.environ['FOO']
+        func = lambda x: int(x)
+        self.assertEqual(_get_env('FOO', '1', coerce=func), 1)
+        # and if the default is not coercable, an error is raised
+        self.assertRaises(CoercianError, _get_env, 'FOO', 'foo', coerce=func)
 
     def test_get_env(self):
         # too many args - we only support one default value ('bar')
@@ -110,15 +119,15 @@ class TestFunctions(unittest.TestCase):
 
     def test_get_int(self):
         self.assertFunc(get_int, "1", 1)
-        self.assertFunc(get_int, "bar", Exception)
+        self.assertFunc(get_int, "bar", CoercianError)
 
     def test_get_float(self):
         self.assertFunc(get_float, "1.0", 1.0)
-        self.assertFunc(get_float, "bar", Exception)
+        self.assertFunc(get_float, "bar", CoercianError)
 
     def test_get_decimal(self):
         self.assertFunc(get_decimal, "1", Decimal("1"))
-        self.assertFunc(get_decimal, "bar", Exception)
+        self.assertFunc(get_decimal, "bar", CoercianError)
 
     def test_get_list(self):
         self.assertFunc(get_list, "false", ['false'])
@@ -130,11 +139,11 @@ class TestFunctions(unittest.TestCase):
     def test_get_dict(self):
         self.assertFunc(get_dict, "false", False)
         self.assertFunc(get_dict, "{\"foo\": false}", {'foo': False})
-        self.assertFunc(get_dict, "hello, world!", ValueError)
+        self.assertFunc(get_dict, "hello, world!", CoercianError)
 
     def test_get_date(self):
         self.assertFunc(get_date, "2016-11-23", datetime.date(2016, 11, 23))
-        self.assertFunc(get_date, "hello, world!", ValueError)
+        self.assertFunc(get_date, "hello, world!", CoercianError)
 
         # get_date also supports other date formats
         self.environ["foo"] = "23-11-2016"
@@ -146,7 +155,7 @@ class TestFunctions(unittest.TestCase):
         # add timezone info
         now = datetime.datetime.now(pytz.utc)
         self.assertFunc(get_datetime, now.isoformat(), now)
-        self.assertFunc(get_datetime, "hello, world!", ValueError)
+        self.assertFunc(get_datetime, "hello, world!", CoercianError)
 
 
 if __name__ == '__main__':
