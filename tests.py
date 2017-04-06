@@ -4,7 +4,11 @@ from decimal import Decimal, InvalidOperation
 import inspect
 import pytz
 import unittest
-from test.test_support import EnvironmentVarGuard
+try:
+    # from py3 mock is builtin
+    from unittest import mock
+except ImportError:
+    import mock
 
 from env_utils import (
     get_env,
@@ -34,14 +38,11 @@ class TestFunctions(unittest.TestCase):
     """Basic function tests."""
 
     def assertFunc(self, func, value, expected):
-        self.environ["foo"] = value
-        if inspect.isclass(expected):
-            self.assertRaises(expected, func, 'foo')
-        else:
-            self.assertEqual(func("foo"), expected)
-
-    def setUp(self):
-        self.environ = EnvironmentVarGuard()
+        with mock.patch.dict('os.environ', {'foo': value}):
+            if inspect.isclass(expected):
+                self.assertRaises(expected, func, 'foo')
+            else:
+                self.assertEqual(func("foo"), expected)
 
     def test__bool(self):
         self.assertEqual(_bool("true"), True)
@@ -89,15 +90,14 @@ class TestFunctions(unittest.TestCase):
         self.assertRaises(RequiredSettingMissing, _get_env, "bar", None, func, True)
         self.assertEqual(_get_env("bar", 'baz'), 'baz')
         # env var exists
-        self.environ['FOO'] = 'bar'
-        self.assertEqual(_get_env('FOO', None), 'bar')
-        # env var coercian fails
-        func = lambda x: int(x)
-        self.assertRaises(Exception, _get_env, "FOO", coerce=func)
+        with mock.patch.dict('os.environ', {'FOO': 'bar'}):
+            self.assertEqual(_get_env('FOO', None), 'bar')
+            # env var coercian fails
+            func = lambda x: int(x)
+            self.assertRaises(Exception, _get_env, "FOO", coerce=func)
 
     def test__get_env_defaults(self):
         # test default values work, and are coerced
-        del self.environ['FOO']
         func = lambda x: int(x)
         self.assertEqual(_get_env('FOO', '1', coerce=func), 1)
         # and if the default is not coercable, an error is raised
@@ -107,7 +107,6 @@ class TestFunctions(unittest.TestCase):
         # too many args - we only support one default value ('bar')
         self.assertRaises(AssertionError, get_env, 'foo', 'bar', 'baz')
         # missing env var, use default
-        del self.environ['FOO']
         self.assertRaises(RequiredSettingMissing, get_env, 'FOO', coerce=lambda x: x)
         self.assertEqual(get_env('FOO', 'bar', coerce=lambda x: x), 'bar')
         # valid env var
@@ -132,9 +131,10 @@ class TestFunctions(unittest.TestCase):
     def test_get_list(self):
         self.assertFunc(get_list, "false", ['false'])
         self.assertFunc(get_list, "true false", ['true', 'false'])
-        self.environ['foo'] = "true,false"
-        self.assertEqual(get_list('foo', separator=','), ['true', 'false'])
-        self.assertEqual(get_list('foo', ["baz"]), ['true,false'])
+        with mock.patch.dict('os.environ', {'foo': 'true,false'}):
+            # self.environ['foo'] = "true,false"
+            self.assertEqual(get_list('foo', separator=','), ['true', 'false'])
+            self.assertEqual(get_list('foo', ["baz"]), ['true,false'])
 
     def test_get_dict(self):
         self.assertFunc(get_dict, "false", False)
@@ -146,8 +146,8 @@ class TestFunctions(unittest.TestCase):
         self.assertFunc(get_date, "hello, world!", CoercianError)
 
         # get_date also supports other date formats
-        self.environ["foo"] = "23-11-2016"
-        self.assertEqual(get_date("foo"), datetime.date(2016, 11, 23))
+        with mock.patch.dict('os.environ', {'foo': '23-11-2016'}):
+            self.assertEqual(get_date("foo"), datetime.date(2016, 11, 23))
 
     def test_get_datetime(self):
         now = datetime.datetime.now()
