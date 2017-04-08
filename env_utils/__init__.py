@@ -10,7 +10,7 @@ class RequiredSettingMissing(Exception):
     """Custom error raised when a required env var is missing."""
 
     def __init__(self, key):
-        msg = u"Required env var '{}' is missing.".format(key)
+        msg = "Required env var '{}' is missing.".format(key)
         super(RequiredSettingMissing, self).__init__(msg)
 
 
@@ -19,7 +19,7 @@ class CoercianError(Exception):
     """Custom error raised when a value cannot be coerced."""
 
     def __init__(self, key, value, func):
-        msg = u"Unable to coerce '{}={}' using {}.".format(key, value, func.__name__)
+        msg = "Unable to coerce '{}={}' using {}.".format(key, value, func.__name__)
         super(CoercianError, self).__init__(msg)
 
 
