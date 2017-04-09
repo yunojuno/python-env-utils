@@ -2,15 +2,12 @@
 import datetime
 from decimal import Decimal, InvalidOperation
 import inspect
+
 import pytz
 import unittest
-try:
-    # from py3 mock is builtin
-    from unittest import mock
-except ImportError:
-    import mock
 
-from env_utils import (
+from .compat import mock
+from .utils import (
     get_env,
     get_bool,
     get_int,
@@ -86,28 +83,40 @@ class TestFunctions(unittest.TestCase):
 
     def test__get_env(self):
         # env var is missing
-        func = lambda x: x
-        self.assertRaises(RequiredSettingMissing, _get_env, "bar", None, func, True)
+        self.assertRaises(
+            RequiredSettingMissing,
+            _get_env,
+            'FOO',
+            required=True
+        )
         self.assertEqual(_get_env("bar", 'baz'), 'baz')
         # env var exists
         with mock.patch.dict('os.environ', {'FOO': 'bar'}):
             self.assertEqual(_get_env('FOO', None), 'bar')
             # env var coercian fails
-            func = lambda x: int(x)
-            self.assertRaises(Exception, _get_env, "FOO", coerce=func)
+            self.assertRaises(
+                Exception,
+                _get_env,
+                "FOO",
+                coerce=(lambda x: int(x))
+            )
 
     def test__get_env_defaults(self):
         # test default values work, and are coerced
-        func = lambda x: int(x)
-        self.assertEqual(_get_env('FOO', '1', coerce=func), 1)
+        self.assertEqual(_get_env('FOO', '1', coerce=lambda x: int(x)), 1)
         # and if the default is not coercable, an error is raised
-        self.assertRaises(CoercianError, _get_env, 'FOO', 'foo', coerce=func)
+        self.assertRaises(
+            CoercianError,
+            _get_env,
+            'FOO',
+            coerce=lambda x: int(x)
+        )
 
     def test_get_env(self):
         # too many args - we only support one default value ('bar')
         self.assertRaises(AssertionError, get_env, 'foo', 'bar', 'baz')
         # missing env var, use default
-        self.assertRaises(RequiredSettingMissing, get_env, 'FOO', coerce=lambda x: x)
+        self.assertRaises(RequiredSettingMissing, get_env, 'FOO', coerce=(lambda x: x))
         self.assertEqual(get_env('FOO', 'bar', coerce=lambda x: x), 'bar')
         # valid env var
         self.assertFunc(get_env, 'foo', 'foo')
