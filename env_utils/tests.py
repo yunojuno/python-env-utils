@@ -49,17 +49,24 @@ class TestFunctions(unittest.TestCase):
         self.assertEqual(_bool("tru"), False)
         self.assertEqual(_bool("0"), False)
         self.assertEqual(_bool(None), False)
+        self.assertEqual(_bool(True), True)
+        self.assertEqual(_bool(False), False)
 
     def test__int(self):
         self.assertEqual(_int("01"), 1)
+        self.assertEqual(_int(1), 1)
         self.assertRaises(ValueError, _int, "foo")
 
     def test__float(self):
         self.assertEqual(_float("01"), 1.0)
+        self.assertEqual(_float(1), 1.0)
+        self.assertEqual(_float(1.0), 1.0)
         self.assertRaises(ValueError, _float, "foo")
 
     def test__decimal(self):
         self.assertEqual(_decimal("01"), Decimal('1.0'))
+        self.assertEqual(_decimal(1), Decimal('1.0'))
+        self.assertEqual(_decimal(1.0), Decimal('1.0'))
         self.assertRaises(InvalidOperation, _decimal, "foo")
 
     def test__dict(self):
@@ -102,15 +109,8 @@ class TestFunctions(unittest.TestCase):
             )
 
     def test__get_env_defaults(self):
-        # test default values work, and are coerced
-        self.assertEqual(_get_env('FOO', '1', coerce=lambda x: int(x)), 1)
-        # and if the default is not coercable, an error is raised
-        self.assertRaises(
-            CoercianError,
-            _get_env,
-            'FOO',
-            coerce=lambda x: int(x)
-        )
+        # test default values are **not** coerced
+        self.assertEqual(_get_env('FOO', '1', coerce=lambda x: int(x)), '1')
 
     def test_get_env(self):
         # too many args - we only support one default value ('bar')

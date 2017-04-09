@@ -11,7 +11,7 @@ os.chdir(normpath(join(abspath(__file__), os.pardir)))
 
 setup(
     name="python-env-utils",
-    version="0.4",
+    version="0.4.1",
     packages=find_packages(),
     include_package_data=True,
     install_requires=['python-dateutil>=2.6'],

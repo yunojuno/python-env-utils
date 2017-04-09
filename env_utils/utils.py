@@ -30,13 +30,14 @@ def _get_env(key, default=None, coerce=lambda x: x, required=False):
 
     This function extends the standard os.getenv function to enable
     the coercion of values into data types other than string (all env
-    vars are strings be default).
+    vars are strings by default).
 
     Args:
         key: string, the name of the env var to look up
 
     Kwargs:
-        default: the default value to return if the env var does not exist
+        default: the default value to return if the env var does not exist. NB the
+            default value is **not** coerced, and is assumed to be of the correct type.
         coerce: a function that is used to coerce the value returned into
             another type
         required: bool, if True, then a RequiredSettingMissing error is raised
@@ -51,7 +52,7 @@ def _get_env(key, default=None, coerce=lambda x: x, required=False):
         if required is True:
             raise RequiredSettingMissing(key)
         else:
-            value = default
+            return default
 
     try:
         return coerce(value)
@@ -61,6 +62,8 @@ def _get_env(key, default=None, coerce=lambda x: x, required=False):
 
 # standard type coercian functions
 def _bool(value):
+    if isinstance(value, bool):
+        return value
     return value is not None and value.lower() in ("true", "1", "y")
 
 
