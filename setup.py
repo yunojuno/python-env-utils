@@ -11,7 +11,7 @@ os.chdir(normpath(join(abspath(__file__), os.pardir)))
 
 setup(
     name="python-env-utils",
-    version="0.4.1",
+    version="0.5.0",
     packages=find_packages(),
     include_package_data=True,
     install_requires=['python-dateutil>=2.6'],
@@ -26,7 +26,9 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
     ],
 )
