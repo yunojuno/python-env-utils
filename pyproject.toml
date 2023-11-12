@@ -1,0 +1,45 @@
+[tool.poetry]
+name = "env_utils"
+version = "1.0.0"
+description = "Utility functions to make it easier to work with os.environ"
+license = "MIT"
+authors = ["YunoJuno <code@yunojuno.com>"]
+maintainers = ["YunoJuno <code@yunojuno.com>"]
+readme = "README.md"
+homepage = "https://github.com/yunojuno/python-env-utils"
+repository = "https://github.com/yunojuno/python-env-utils"
+documentation = "https://github.com/yunojuno/python-env-utils"
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+packages = [{ include = "env_utils" }]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+python-dateutil = "*"
+pytest = "^7.4.3"
+
+
+[tool.poetry.dev-dependencies]
+black = "*"
+coverage = "*"
+freezegun = "*"
+mypy = "*"
+pre-commit = "*"
+pytest = "*"
+pytest-cov = "*"
+pytest-django = "*"
+ruff = "*"
+tox = "*"
+types-python-dateutil = "*"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
