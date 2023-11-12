@@ -1,30 +1,43 @@
-# -*- coding: utf-8 -*-
+import datetime
 import decimal
 import json
 import os
+from typing import Any, Callable, Union
 
 from dateutil import parser
 
+EnvVarType = Union[
+    str,
+    int,
+    float,
+    decimal.Decimal,
+    bool,
+    dict,
+    list,
+    datetime.date,
+    datetime.datetime,
+]
+
 
 class RequiredSettingMissing(Exception):
-
     """Custom error raised when a required env var is missing."""
 
-    def __init__(self, key):
+    def __init__(self, key: str) -> None:
         msg = "Required env var '{}' is missing.".format(key)
         super(RequiredSettingMissing, self).__init__(msg)
 
 
 class CoercianError(Exception):
-
     """Custom error raised when a value cannot be coerced."""
 
-    def __init__(self, key, value, func):
+    def __init__(self, key: str, value: Any, func: Callable) -> None:
         msg = "Unable to coerce '{}={}' using {}.".format(key, value, func.__name__)
         super(CoercianError, self).__init__(msg)
 
 
-def _get_env(key, default=None, coerce=lambda x: x, required=False):
+def _get_env(
+    key: str, *, default: Union[EnvVarType, None], coerce: Callable, required: bool
+) -> Any:
     """
     Return env var coerced into a type other than string.
 
@@ -53,7 +66,6 @@ def _get_env(key, default=None, coerce=lambda x: x, required=False):
             raise RequiredSettingMissing(key)
         else:
             return default
-
     try:
         return coerce(value)
     except Exception:
@@ -61,39 +73,39 @@ def _get_env(key, default=None, coerce=lambda x: x, required=False):
 
 
 # standard type coercian functions
-def _bool(value):
-    if isinstance(value, bool):
-        return value
+def _bool(value: str) -> bool:
     return value is not None and value.lower() in ("true", "1", "y")
 
 
-def _int(value):
+def _int(value: str) -> int:
     return int(value)
 
 
-def _float(value):
+def _float(value: str) -> float:
     return float(value)
 
 
-def _decimal(value):
+def _decimal(value: str) -> decimal.Decimal:
     return decimal.Decimal(value)
 
 
-def _dict(value):
+def _dict(value: str) -> dict:
     return json.loads(value)
 
 
-def _datetime(value):
+def _datetime(value: str) -> datetime.datetime:
     return parser.parse(value)
 
 
-def _date(value):
+def _date(value: str) -> datetime.date:
     return parser.parse(value).date()
 
 
-def get_env(key, *default, **kwargs):
+def get_env(
+    key: str, *default: Union[EnvVarType, None], coerce: Callable = lambda x: x
+) -> Any:
     """
-    Return env var.
+    Return
 
     This is the parent function of all other get_foo functions,
     and is responsible for unpacking args/kwargs into the values
@@ -116,49 +128,48 @@ def get_env(key, *default, **kwargs):
     Returns the env var, coerced if required, and a default if supplied.
 
     """
-    assert len(default) in (0, 1), "Too many args supplied."
-    func = kwargs.get('coerce', lambda x: x)
-    required = (len(default) == 0)
-    default = default[0] if not required else None
-    return _get_env(key, default=default, coerce=func, required=required)
+    if len(default) > 1:
+        raise ValueError("Too many args supplied.")
+    if len(default) == 0:
+        return _get_env(key, default=None, coerce=coerce, required=True)
+    return _get_env(key, default=default[0], coerce=coerce, required=False)
 
 
-def get_bool(key, *default):
+def get_bool(key: str, *default: bool) -> bool:
     """Return env var cast as boolean."""
     return get_env(key, *default, coerce=_bool)
 
 
-def get_int(key, *default):
+def get_int(key: str, *default: int) -> int:
     """Return env var cast as integer."""
     return get_env(key, *default, coerce=_int)
 
 
-def get_float(key, *default):
+def get_float(key: str, *default: float) -> float:
     """Return env var cast as float."""
     return get_env(key, *default, coerce=_float)
 
 
-def get_decimal(key, *default):
+def get_decimal(key: str, *default: decimal.Decimal) -> decimal.Decimal:
     """Return env var cast as Decimal."""
     return get_env(key, *default, coerce=_decimal)
 
 
-def get_list(key, *default, **kwargs):
+def get_list(key: str, *default: list, separator: str = " ") -> list:
     """Return env var as a list."""
-    separator = kwargs.get('separator', ' ')
     return get_env(key, *default, coerce=lambda x: x.split(separator))
 
 
-def get_dict(key, *default):
+def get_dict(key: str, *default: dict) -> dict:
     """Return env var as a dict."""
     return get_env(key, *default, coerce=_dict)
 
 
-def get_date(key, *default):
+def get_date(key: str, *default: datetime.date) -> datetime.date:
     """Return env var as a date."""
     return get_env(key, *default, coerce=_date)
 
 
-def get_datetime(key, *default):
+def get_datetime(key: str, *default: datetime.datetime) -> datetime.datetime:
     """Return env var as a datetime."""
     return get_env(key, *default, coerce=_datetime)
