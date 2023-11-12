@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python: ["38", "39", "310", "311", "312"]
+        python: ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
     env:
       TOXENV: py${{ matrix.python }}
