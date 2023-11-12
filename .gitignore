@@ -1,4 +1,6 @@
 __pycache__
-poetry.lock
-*.pyc
 .coverage
+.ruff_cache
+.tox
+*.pyc
+poetry.lock

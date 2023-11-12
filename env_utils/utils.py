@@ -2,21 +2,21 @@ import datetime
 import decimal
 import json
 import os
-from typing import Any, Callable
+from typing import Any, Callable, Union
 
 from dateutil import parser
 
-EnvVarType = (
-    str
-    | int
-    | float
-    | decimal.Decimal
-    | bool
-    | dict
-    | list
-    | datetime.date
-    | datetime.datetime
-)
+EnvVarType = Union[
+    str,
+    int,
+    float,
+    decimal.Decimal,
+    bool,
+    dict,
+    list,
+    datetime.date,
+    datetime.datetime,
+]
 
 
 class RequiredSettingMissing(Exception):
@@ -36,7 +36,7 @@ class CoercianError(Exception):
 
 
 def _get_env(
-    key: str, *, default: EnvVarType | None, coerce: Callable, required: bool
+    key: str, *, default: Union[EnvVarType, None], coerce: Callable, required: bool
 ) -> Any:
     """
     Return env var coerced into a type other than string.
@@ -102,7 +102,7 @@ def _date(value: str) -> datetime.date:
 
 
 def get_env(
-    key: str, *default: EnvVarType | None, coerce: Callable = lambda x: x
+    key: str, *default: Union[EnvVarType, None], coerce: Callable = lambda x: x
 ) -> Any:
     """
     Return
@@ -140,36 +140,36 @@ def get_bool(key: str, *default: bool) -> bool:
     return get_env(key, *default, coerce=_bool)
 
 
-def get_int(key: str, *default: int | None) -> int:
+def get_int(key: str, *default: int) -> int:
     """Return env var cast as integer."""
     return get_env(key, *default, coerce=_int)
 
 
-def get_float(key: str, *default: float | None) -> float:
+def get_float(key: str, *default: float) -> float:
     """Return env var cast as float."""
     return get_env(key, *default, coerce=_float)
 
 
-def get_decimal(key: str, *default: decimal.Decimal | None) -> decimal.Decimal:
+def get_decimal(key: str, *default: decimal.Decimal) -> decimal.Decimal:
     """Return env var cast as Decimal."""
     return get_env(key, *default, coerce=_decimal)
 
 
-def get_list(key: str, *default: list | None, separator: str = " ") -> list:
+def get_list(key: str, *default: list, separator: str = " ") -> list:
     """Return env var as a list."""
     return get_env(key, *default, coerce=lambda x: x.split(separator))
 
 
-def get_dict(key: str, *default: dict | None) -> dict:
+def get_dict(key: str, *default: dict) -> dict:
     """Return env var as a dict."""
     return get_env(key, *default, coerce=_dict)
 
 
-def get_date(key: str, *default: datetime.date | None) -> datetime.date:
+def get_date(key: str, *default: datetime.date) -> datetime.date:
     """Return env var as a date."""
     return get_env(key, *default, coerce=_date)
 
 
-def get_datetime(key: str, *default: datetime.datetime | None) -> datetime.datetime:
+def get_datetime(key: str, *default: datetime.datetime) -> datetime.datetime:
     """Return env var as a datetime."""
     return get_env(key, *default, coerce=_datetime)
